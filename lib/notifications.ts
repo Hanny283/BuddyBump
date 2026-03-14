@@ -40,7 +40,7 @@ export async function registerForPushNotifications(uid?: string): Promise<string
 
     return token;
   } catch (error) {
-    console.error('Error getting push notification token:', error);
+    console.log('Error getting push notification token:', error);
     return null;
   }
 }
@@ -73,15 +73,19 @@ export async function sendPushNotification(
       body: JSON.stringify({ to: token, title, body, data }),
     });
   } catch (error) {
-    console.error('Failed to send push notification:', error);
+    console.log('Failed to send push notification:', error);
   }
 }
 
 export async function sendLocalNotification(title: string, body: string, data?: any): Promise<void> {
-  await Notifications.scheduleNotificationAsync({
-    content: { title, body, data },
-    trigger: null,
-  });
+  try {
+    await Notifications.scheduleNotificationAsync({
+      content: { title, body, data },
+      trigger: null,
+    });
+  } catch (error) {
+    console.log('Failed to schedule local notification:', error);
+  }
 }
 
 export function addNotificationListener(

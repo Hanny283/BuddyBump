@@ -19,6 +19,7 @@ import { formatUserName } from './utils';
 
 const LOCKS_COLLECTION = 'locks';
 const UNLOCK_REQUESTS_COLLECTION = 'unlockRequests';
+const BLOCK_EVENTS_COLLECTION = 'blockEvents';
 
 function nowMs(): number {
   return Date.now();
@@ -171,6 +172,22 @@ export async function startMonitoringForCreator(lockId: string): Promise<void> {
   }
 }
 
+async function logBlockEvent(lock: Lock): Promise<void> {
+  try {
+    const now = new Date();
+    await addDoc(collection(db, BLOCK_EVENTS_COLLECTION), {
+      userId: lock.creatorUserId,
+      lockId: lock.id,
+      dailyMinutes: lock.dailyMinutes,
+      blockedAt: nowMs(),
+      dayOfWeek: now.getDay(),
+      hourOfDay: now.getHours(),
+    });
+  } catch (error) {
+    console.warn('⚠️ Could not log block event:', error);
+  }
+}
+
 export async function blockLock(lockId: string): Promise<void> {
   if (Platform.OS !== 'ios') return;
 
@@ -191,6 +208,7 @@ export async function blockLock(lockId: string): Promise<void> {
         blockedAt: nowMs(),
         updatedAt: nowMs(),
       });
+      await logBlockEvent({ id: lockId, ...(lockSnap.data() as Lock) });
     } catch (firestoreError) {
       console.warn('⚠️ Could not update Firestore (permissions?), but apps are still blocked:', firestoreError);
     }
@@ -338,7 +356,7 @@ export async function deleteLock(lockId: string, userId: string): Promise<void> 
         { type: 'lock_deleted', lockId }
       );
     } catch (error) {
-      console.error('Failed to send notification:', error);
+      console.log('Failed to send notification:', error);
     }
 
     return;
@@ -419,7 +437,7 @@ export async function createUnlockRequest(lockId: string, message?: string): Pro
       }
     );
   } catch (error) {
-    console.error('❌ Failed to send notification:', error);
+    console.log('❌ Failed to send notification:', error);
   }
 
   return { id: ref.id, ...data } as unknown as UnlockRequest;
@@ -509,7 +527,7 @@ export async function approveUnlockRequest(requestId: string): Promise<void> {
           }
         );
       } catch (error) {
-        console.error('❌ Failed to send approval notification:', error);
+        console.log('❌ Failed to send approval notification:', error);
       }
     } catch (error) {
       console.error('Failed to reset Screen Time monitoring:', error);
@@ -549,7 +567,7 @@ export async function denyUnlockRequest(requestId: string): Promise<void> {
       }
     );
   } catch (error) {
-    console.error('❌ Failed to send denial notification:', error);
+    console.log('❌ Failed to send denial notification:', error);
   }
 }
 
