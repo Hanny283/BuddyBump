@@ -86,7 +86,7 @@ export default function HomeScreen() {
   if (!user) {
     return (
       <SafeAreaView style={styles.container} edges={['top', 'left', 'right', 'bottom']}>
-        <Text style={styles.welcomeText}>Welcome to BuddyBump!</Text>
+        <Text style={styles.welcomeText}>Welcome to TimeSync!</Text>
         <View style={styles.authButtons}>
           <Button title="Sign In" onPress={() => router.push('/signin')} />
           <Button title="Sign Up" onPress={() => router.push('/signup')} variant="secondary" />
@@ -203,7 +203,7 @@ export default function HomeScreen() {
                   if (!authorized) {
                     Alert.alert(
                       'Screen Time Access Required',
-                      'Grant Screen Time permission to create locks. Go to Settings › Screen Time and allow BuddyBump.'
+                      'Grant Screen Time permission to create locks. Go to Settings › Screen Time and allow TimeSync.'
                     );
                     return;
                   }

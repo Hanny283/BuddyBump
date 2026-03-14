@@ -28,7 +28,7 @@ export default function ProfileScreen() {
   const handleClearRestrictions = () => {
     Alert.alert(
       'Clear All Restrictions',
-      'This will remove all active Screen Time restrictions managed by BuddyBump. Continue?',
+      'This will remove all active Screen Time restrictions managed by TimeSync. Continue?',
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -116,7 +116,7 @@ export default function ProfileScreen() {
           style={styles.signOutBtn}
         />
 
-        <Text style={styles.version}>BuddyBump v1.0</Text>
+        <Text style={styles.version}>TimeSync v1.0</Text>
       </ScrollView>
     </SafeAreaView>
   );

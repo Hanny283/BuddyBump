@@ -1,8 +1,8 @@
-# BuddyBump — Backend Engineer Prompt
+# TimeSync — Backend Engineer Prompt
 
 ## Context
 
-BuddyBump is a React Native (Expo) iOS app that lets users place Screen Time limits on each other as accountability buddies. The frontend is complete. You are being brought in to harden the backend: write Firestore security rules, set up Cloud Functions for push notifications and a nightly reset, and add a few missing Firestore writes.
+TimeSync is a React Native (Expo) iOS app that lets users place Screen Time limits on each other as accountability buddies. The frontend is complete. You are being brought in to harden the backend: write Firestore security rules, set up Cloud Functions for push notifications and a nightly reset, and add a few missing Firestore writes.
 
 **Firebase project:** `lock-it-a3dee` (Firestore + Firebase Auth already in use — do not rename)
 **Notifications:** Expo Push Notification service (`exp.host/--/api/v2/push/send`)

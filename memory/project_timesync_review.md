@@ -1,5 +1,5 @@
 ---
-name: BuddyBump UI Overhaul
+name: TimeSync UI Overhaul
 description: Full UI overhaul completed 2026-03-14 — dark theme, new components, profile tab, README, backend prompt
 type: project
 ---
@@ -13,7 +13,7 @@ Full UI overhaul implemented across all screens on 2026-03-14.
 - `components/ui/Button.tsx` — added danger/ghost variants, size prop (sm/md/lg), leftIcon
 - `components/ui/StatusBadge.tsx` — new; colored pill for lock status
 - `components/ui/LockCard.tsx` — new; reusable card extracted from your_locks
-- `app/signin.tsx` + `app/signup.tsx` — dark theme, logo section (lock icon + BUDDYBUMP label), removed "Go Back" link
+- `app/signin.tsx` + `app/signup.tsx` — dark theme, logo section (lock icon + TIMESYNC label), removed "Go Back" link
 - `app/(tabs)/profile.tsx` — new screen with avatar, Screen Time status chip, sign out
 - `app/(tabs)/_layout.tsx` — Ionicons tab icons, 3-tab layout (Home/Locks/Profile), iOS height fix, badge on Locks tab for pending unlock requests
 - `app/(tabs)/index.tsx` — greeting header, avatar button to Profile, stats with icons/accent borders, active lock summary, info tip card, removed sign-out button

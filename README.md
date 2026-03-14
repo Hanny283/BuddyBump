@@ -1,15 +1,15 @@
-# BuddyBump
+# TimeSync
 
-BuddyBump is an iOS app that lets one person (the **creator**) place a daily Screen Time limit on specific apps for another person (the **holder**). When the holder's time runs out iOS shields the restricted apps; the holder can request an unlock which the creator approves or denies in real time.
+TimeSync is an iOS app that lets one person (the **creator**) place a daily Screen Time limit on specific apps for another person (the **holder**). When the holder's time runs out iOS shields the restricted apps; the holder can request an unlock which the creator approves or denies in real time.
 
 ---
 
 ## How it works
 
 ### Creator flow
-1. Open BuddyBump and tap **Create Lock** on the Home tab.
+1. Open TimeSync and tap **Create Lock** on the Home tab.
 2. Select which apps to restrict and choose a daily time limit (in minutes).
-3. Share the generated deep-link (`buddybump://lock/{inviteId}`) with the holder.
+3. Share the generated deep-link (`timesync://lock/{inviteId}`) with the holder.
 
 ### Holder flow
 1. Open the deep-link on the holder's device.
@@ -19,7 +19,7 @@ BuddyBump is an iOS app that lets one person (the **creator**) place a daily Scr
 ### Unlock request flow
 1. Holder taps **Request Unlock** on the shield screen (or from the Locks tab).
 2. A push notification is sent to the creator.
-3. Creator approves or denies inside BuddyBump — if approved, the shield is removed and the timer resets.
+3. Creator approves or denies inside TimeSync — if approved, the shield is removed and the timer resets.
 
 ---
 
@@ -63,7 +63,7 @@ lib/
     firestore.ts
   locks/
     service.ts               All Firestore + Screen Time business logic
-    DeepLinkProvider.tsx     buddybump:// URL parsing and pending-invite state
+    DeepLinkProvider.tsx     timesync:// URL parsing and pending-invite state
     types.ts
     utils.ts                 formatUserName helper
   screentime.ts              react-native-device-activity wrappers
@@ -119,7 +119,7 @@ creatorUserId:  string
 holderUserId:   string | null
 status:         'pending' | 'active' | 'cancelled' | 'deleted'
 inviteId:       string
-inviteUrl:      string          // buddybump://lock/{inviteId}
+inviteUrl:      string          // timesync://lock/{inviteId}
 appTokens:      string[]        // FamilyActivitySelection tokens
 dailyMinutes:   number
 isBlocked:      boolean
@@ -157,12 +157,12 @@ updatedAt:  number (ms)
 ### 1. Clone and install
 ```bash
 git clone <repo>
-cd BuddyBump
+cd TimeSync
 npm install
 ```
 
 ### 2. Configure Firebase
-Copy your Firebase project credentials into `lib/firebase/config.ts`. The current file references the project `lock-it-a3dee` — this is an external Firebase resource and **must not be renamed** even though the rest of the codebase uses the BuddyBump name.
+Copy your Firebase project credentials into `lib/firebase/config.ts`. The current file references the project `lock-it-a3dee` — this is an external Firebase resource and **must not be renamed** even though the rest of the codebase uses the TimeSync name.
 
 ### 3. Apple Developer setup
 - Enable the **Family Controls** entitlement in your Apple Developer portal (requires explicit approval from Apple).

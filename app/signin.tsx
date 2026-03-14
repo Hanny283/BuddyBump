@@ -72,7 +72,7 @@ export default function SignInScreen() {
         <View style={styles.content}>
           <View style={styles.logoSection}>
             <Ionicons name="lock-closed" size={48} color={Colors.blue} />
-            <Text style={styles.logoLabel}>BUDDYBUMP</Text>
+            <Text style={styles.logoLabel}>TIMESYNC</Text>
           </View>
 
           <Text style={styles.title}>Sign In</Text>
