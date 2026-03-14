@@ -1,6 +1,8 @@
 import { Stack, useRouter, useSegments } from "expo-router";
 import { useEffect } from "react";
+import { View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import WebDemoBanner from "../components/WebDemoBanner";
 import ErrorBoundary from "../components/ErrorBoundary";
 import { AuthProvider, useAuth } from "../lib/firebase/AuthContext";
 import { DeepLinkProvider } from "../lib/locks/DeepLinkProvider";
@@ -31,7 +33,10 @@ export default function RootLayout() {
     <ErrorBoundary>
     <AuthProvider>
       <DeepLinkProvider>
-        <AuthGate />
+        <View style={{ flex: 1 }}>
+          <WebDemoBanner />
+          <AuthGate />
+        </View>
       </DeepLinkProvider>
     </AuthProvider>
     </ErrorBoundary>

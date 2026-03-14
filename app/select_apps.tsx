@@ -53,10 +53,16 @@ export default function SelectAppsScreen() {
         creatorUserId: user.uid,
       });
 
-      await Share.share({
-        message: `I'm setting up a Screen Time lock for myself. Accept it here: ${lock.inviteUrl}`,
-        url: lock.inviteUrl,
-      });
+      if (Platform.OS === 'web') {
+        const inviteUrl = typeof window !== 'undefined' ? `${window.location.origin}/lock/${lock.inviteId}` : lock.inviteUrl;
+        await navigator.clipboard.writeText(inviteUrl);
+        Alert.alert('Link Copied!', `Invite link copied to clipboard. Share it with your lock holder.`);
+      } else {
+        await Share.share({
+          message: `I'm setting up a Screen Time lock for myself. Accept it here: ${lock.inviteUrl}`,
+          url: lock.inviteUrl,
+        });
+      }
 
       router.replace('/(tabs)/your_locks');
     } catch (error) {
@@ -107,6 +113,24 @@ export default function SelectAppsScreen() {
               familyActivitySelection={appSelection}
               style={styles.picker}
             />
+          </View>
+        ) : Platform.OS === 'web' ? (
+          <View style={styles.demoPickerContainer}>
+            <Text style={styles.demoPickerLabel}>Web Demo — select a category:</Text>
+            <View style={styles.demoChipsRow}>
+              {['Social Media', 'Games', 'Entertainment', 'Productivity'].map((cat) => (
+                <TouchableOpacity
+                  key={cat}
+                  style={[styles.demoChip, appSelection === `web-demo-${cat.toLowerCase().replace(' ', '-')}` && styles.demoChipActive]}
+                  onPress={() => setAppSelection(`web-demo-${cat.toLowerCase().replace(' ', '-')}`)}
+                >
+                  <Text style={[styles.demoChipText, appSelection === `web-demo-${cat.toLowerCase().replace(' ', '-')}` && styles.demoChipTextActive]}>
+                    {cat}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            <Text style={styles.demoHint}>Screen Time blocking is iOS-only. This creates a demo lock.</Text>
           </View>
         ) : (
           <View style={styles.pickerContainer}>
@@ -277,6 +301,49 @@ const styles = StyleSheet.create({
   platformNote: {
     color: Colors.textMuted,
     fontSize: 14,
+  },
+  demoPickerContainer: {
+    padding: 16,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 10,
+    backgroundColor: Colors.card,
+    gap: 12,
+  },
+  demoPickerLabel: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    fontWeight: '600',
+  },
+  demoChipsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  demoChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 20,
+    backgroundColor: Colors.card,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  demoChipActive: {
+    backgroundColor: Colors.blue,
+    borderColor: Colors.blue,
+  },
+  demoChipText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: Colors.textSecondary,
+  },
+  demoChipTextActive: {
+    color: '#FFFFFF',
+  },
+  demoHint: {
+    fontSize: 12,
+    color: Colors.textMuted,
+    lineHeight: 16,
   },
   selectedBadge: {
     flexDirection: 'row',

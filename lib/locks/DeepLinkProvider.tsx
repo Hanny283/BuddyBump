@@ -41,6 +41,12 @@ export const DeepLinkProvider: React.FC<{ children: ReactNode }> = ({ children }
   // Handle URL parsing and invite extraction
   const extractInviteIdFromUrl = (url: string): string | null => {
     try {
+      // Handle web URLs: https://domain/lock/{inviteId}
+      if (url.startsWith('http://') || url.startsWith('https://')) {
+        const match = url.match(/\/lock\/([a-f0-9]+)/i);
+        if (match && match[1]) return match[1];
+      }
+
       const parsed = Linking.parse(url);
 
       // Handle timesync://lock/{inviteId}

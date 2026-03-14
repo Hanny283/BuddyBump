@@ -10,7 +10,7 @@ import {
   userDefaultsSet,
   setFamilyActivitySelectionId,
   getActivities,
-} from 'react-native-device-activity';
+} from '../device-activity';
 import { db } from '../firebase/config';
 import { getFamilyActivitySelection } from '../screentime';
 import { sendPushNotification } from '../notifications';
