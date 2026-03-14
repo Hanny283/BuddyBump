@@ -1,65 +1,8 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // Users can only read/write their own profile
-    match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-
-    // Push tokens: any authenticated user can read (tokens only allow sending notifications,
-    // not accessing data), but only the owner can write their own token.
-    match /pushTokens/{userId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null && request.auth.uid == userId;
-    }
-
-    // Locks: readable by creator or holder, writable by creator
-    match /locks/{lockId} {
-      allow read: if request.auth != null
-        && (request.auth.uid == resource.data.creatorUserId
-            || request.auth.uid == resource.data.holderUserId);
-
-      // Creating a lock: must be authenticated and set yourself as creator
-      allow create: if request.auth != null
-        && request.auth.uid == request.resource.data.creatorUserId;
-
-      // Updating a lock:
-      // - Creator can update (cancel, etc.)
-      // - Holder can update (accept → sets holderUserId to themselves)
-      allow update: if request.auth != null
-        && (request.auth.uid == resource.data.creatorUserId
-            || request.auth.uid == resource.data.holderUserId
-            // Allow the accepting user to set holderUserId on a pending lock
-            || (resource.data.status == 'pending'
-                && request.auth.uid == request.resource.data.holderUserId));
-    }
-
-    // Block events: written by the restricted user (creator), read by same user
-    match /blockEvents/{eventId} {
-      allow create: if request.auth != null
-        && request.auth.uid == request.resource.data.userId;
-      allow read: if request.auth != null
-        && request.auth.uid == resource.data.userId;
-    }
-
-    // AI insights cache: only the owning user can read or write
-    match /aiInsights/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-
-    // Unlock requests: readable/writable by either party on the associated lock
-    match /unlockRequests/{requestId} {
-      allow read: if request.auth != null
-        && (request.auth.uid == resource.data.creatorUserId
-            || request.auth.uid == resource.data.holderUserId);
-
-      allow create: if request.auth != null
-        && request.auth.uid == request.resource.data.creatorUserId;
-
-      allow update: if request.auth != null
-        && (request.auth.uid == resource.data.creatorUserId
-            || request.auth.uid == resource.data.holderUserId);
+    match /{document=**} {
+      allow read, write: if request.auth != null;
     }
   }
 }
