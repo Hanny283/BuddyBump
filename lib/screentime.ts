@@ -40,20 +40,20 @@ export async function requestFamilyControlsAuthorization(): Promise<boolean> {
   if (Platform.OS !== 'ios') return false;
   
   try {
-    console.log('Requesting Family Controls authorization...');
-    
+    if (__DEV__) console.log('Requesting Family Controls authorization...');
+
     // Request authorization
     await requestAuthorization('individual');
-    
+
     // Poll for status change (user response)
-    console.log('Waiting for user response...');
+    if (__DEV__) console.log('Waiting for user response...');
     const finalStatus = await pollAuthorizationStatus({
       pollIntervalMs: 500,
       maxAttempts: 20
     });
-    
+
     const authorized = finalStatus === AuthorizationStatus.approved;
-    console.log('Final authorization status:', finalStatus, 'authorized:', authorized);
+    if (__DEV__) console.log('Final authorization status:', finalStatus, 'authorized:', authorized);
     
     return authorized;
   } catch (error) {
@@ -110,24 +110,24 @@ export { onDeviceActivityMonitorEvent };
 // Emergency function to clear ALL Screen Time restrictions
 export async function clearAllRestrictions(): Promise<void> {
   if (Platform.OS !== 'ios') {
-    console.log('Screen Time only available on iOS');
+    if (__DEV__) console.log('Screen Time only available on iOS');
     return;
   }
-  
+
   try {
-    console.log('🚨 CLEARING ALL SCREEN TIME RESTRICTIONS...');
-    
+    if (__DEV__) console.log('🚨 CLEARING ALL SCREEN TIME RESTRICTIONS...');
+
     const { stopMonitoring, resetBlocks } = await import('react-native-device-activity');
-    
+
     // Stop all monitoring activities (calling with no args stops all)
     stopMonitoring();
-    console.log('✅ All monitoring stopped');
-    
+    if (__DEV__) console.log('✅ All monitoring stopped');
+
     // Clear all blocks and shields
     resetBlocks();
-    console.log('✅ All blocks and shields cleared');
-    
-    console.log('✅ All restrictions cleared successfully!');
+    if (__DEV__) console.log('✅ All blocks and shields cleared');
+
+    if (__DEV__) console.log('✅ All restrictions cleared successfully!');
   } catch (error) {
     console.error('❌ Failed to clear restrictions:', error);
     throw error;

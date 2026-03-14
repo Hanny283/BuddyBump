@@ -1,7 +1,8 @@
-import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, StyleSheet, Text, View } from 'react-native';
 import Button from '../ui/Button';
+import { Colors, Radius, Spacing } from '../../constants/theme';
 import { approveUnlockRequest, denyUnlockRequest, getLock, subscribeToUnlockRequests } from '../../lib/locks/service';
 import { Lock, UnlockRequest } from '../../lib/locks/types';
 
@@ -19,11 +20,10 @@ export default function UnlockRequestsList({ userId, onRequestResolved }: Unlock
   useEffect(() => {
     const unsubscribe = subscribeToUnlockRequests(userId, async (newRequests) => {
       setRequests(newRequests);
-      
-      // Load lock details for each request
+
       const lockIds = newRequests.map(r => r.lockId);
       const uniqueLockIds = Array.from(new Set(lockIds));
-      
+
       const lockPromises = uniqueLockIds.map(async (lockId) => {
         try {
           const lock = await getLock(lockId);
@@ -33,13 +33,13 @@ export default function UnlockRequestsList({ userId, onRequestResolved }: Unlock
           return { lockId, lock: null };
         }
       });
-      
+
       const results = await Promise.all(lockPromises);
       const locksMap: Record<string, Lock> = {};
       results.forEach(({ lockId, lock }) => {
         if (lock) locksMap[lockId] = lock;
       });
-      
+
       setLocks(locksMap);
       setLoading(false);
     });
@@ -49,7 +49,7 @@ export default function UnlockRequestsList({ userId, onRequestResolved }: Unlock
 
   const handleApprove = async (request: UnlockRequest) => {
     setProcessingIds(prev => new Set(prev).add(request.id));
-    
+
     try {
       await approveUnlockRequest(request.id);
       Alert.alert('Approved', 'Unlock request approved! Timer has been reset.');
@@ -77,7 +77,7 @@ export default function UnlockRequestsList({ userId, onRequestResolved }: Unlock
           style: 'destructive',
           onPress: async () => {
             setProcessingIds(prev => new Set(prev).add(request.id));
-            
+
             try {
               await denyUnlockRequest(request.id);
               onRequestResolved?.();
@@ -100,7 +100,7 @@ export default function UnlockRequestsList({ userId, onRequestResolved }: Unlock
   if (loading) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator size="small" color="#007AFF" />
+        <ActivityIndicator size="small" color={Colors.blue} />
       </View>
     );
   }
@@ -111,19 +111,17 @@ export default function UnlockRequestsList({ userId, onRequestResolved }: Unlock
 
   return (
     <View style={styles.container}>
-      <Text style={styles.sectionTitle}>🔔 Unlock Requests</Text>
+      <Text style={styles.sectionTitle}>Unlock Requests</Text>
       {requests.map((request) => {
         const lock = locks[request.lockId];
         const isProcessing = processingIds.has(request.id);
         const creatorName = request.creatorName || 'Someone';
-        
+
         return (
           <View key={request.id} style={styles.requestCard}>
-            <Text style={styles.requestEmoji}>🔓</Text>
+            <Ionicons name="lock-open" size={24} color={Colors.orange} style={styles.requestIcon} />
             <View style={styles.requestHeader}>
-              <Text style={styles.requestTitle}>
-                {creatorName} needs more time
-              </Text>
+              <Text style={styles.requestTitle}>{creatorName} needs more time</Text>
               <Text style={styles.requestSubtitle}>
                 Requesting {lock?.dailyMinutes || '?'} more minutes
               </Text>
@@ -131,27 +129,27 @@ export default function UnlockRequestsList({ userId, onRequestResolved }: Unlock
                 {new Date(request.requestedAt).toLocaleTimeString()}
               </Text>
             </View>
-            
+
             {request.message && (
               <View style={styles.messageContainer}>
                 <Text style={styles.messageLabel}>Message:</Text>
                 <Text style={styles.message}>"{request.message}"</Text>
               </View>
             )}
-            
+
             <View style={styles.buttonRow}>
               <Button
-                title={isProcessing ? '⏳ Processing...' : '✅ Grant Time'}
+                title={isProcessing ? 'Processing...' : 'Grant Time'}
                 onPress={() => handleApprove(request)}
                 disabled={isProcessing}
-                style={styles.approveButton}
+                style={[styles.approveButton, { flex: 1 }]}
               />
               <Button
-                title="❌ Deny"
+                title="Deny"
                 onPress={() => handleDeny(request)}
                 disabled={isProcessing}
-                variant="secondary"
-                style={styles.denyButton}
+                variant="danger"
+                style={{ flex: 1 }}
               />
             </View>
           </View>
@@ -163,71 +161,67 @@ export default function UnlockRequestsList({ userId, onRequestResolved }: Unlock
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 20,
+    marginBottom: Spacing.lg,
   },
   sectionTitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#EDEDED',
-    marginBottom: 16,
+    color: Colors.textPrimary,
+    marginBottom: Spacing.base,
     textAlign: 'center',
   },
   requestCard: {
     backgroundColor: '#1F1F23',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 16,
-    borderWidth: 3,
-    borderColor: '#F59E0B', // Orange highlight for urgency
-    shadowColor: '#F59E0B',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+    borderRadius: Radius.lg,
+    padding: Spacing.lg,
+    marginBottom: Spacing.base,
+    borderWidth: 1,
+    borderLeftWidth: 4,
+    borderColor: Colors.border,
+    borderLeftColor: Colors.orange,
   },
-  requestEmoji: {
-    fontSize: 48,
+  requestIcon: {
     textAlign: 'center',
-    marginBottom: 12,
+    marginBottom: Spacing.md,
   },
   requestHeader: {
-    marginBottom: 16,
+    marginBottom: Spacing.base,
     alignItems: 'center',
   },
   requestTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#EDEDED',
+    color: Colors.textPrimary,
     marginBottom: 6,
     textAlign: 'center',
   },
   requestSubtitle: {
     fontSize: 16,
-    color: '#F59E0B',
+    color: Colors.orange,
     fontWeight: '600',
     marginBottom: 4,
     textAlign: 'center',
   },
   requestTime: {
     fontSize: 14,
-    color: '#A1A1AA',
+    color: Colors.textSecondary,
     textAlign: 'center',
   },
   messageContainer: {
-    backgroundColor: '#27272A',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 16,
+    backgroundColor: Colors.border,
+    borderRadius: Radius.md,
+    padding: Spacing.md,
+    marginBottom: Spacing.base,
   },
   messageLabel: {
     fontSize: 12,
-    color: '#A1A1AA',
+    color: Colors.textSecondary,
     marginBottom: 4,
     textTransform: 'uppercase',
   },
   message: {
     fontSize: 16,
-    color: '#EDEDED',
+    color: Colors.textPrimary,
     fontStyle: 'italic',
     lineHeight: 22,
   },
@@ -236,10 +230,6 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   approveButton: {
-    flex: 1,
-    backgroundColor: '#10B981',
-  },
-  denyButton: {
-    flex: 1,
+    backgroundColor: Colors.green,
   },
 });

@@ -1,8 +1,10 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '../../components/ui/Button';
+import { Colors, Radius, Spacing } from '../../constants/theme';
 import { useAuth } from '../../lib/firebase/AuthContext';
 import { acceptLock, getLockByInviteId } from '../../lib/locks/service';
 import { Lock } from '../../lib/locks/types';
@@ -24,37 +26,32 @@ export default function AcceptLockScreen() {
       }
 
       try {
-        console.log('Loading lock with inviteId:', inviteId);
         const lockData = await getLockByInviteId(inviteId);
-        
+
         if (!lockData) {
           setError('Lock not found. It may have been cancelled or already accepted.');
           setLoading(false);
           return;
         }
 
-        // Check if lock is already active
         if (lockData.status === 'active') {
           setError('This lock has already been accepted and is now active.');
           setLoading(false);
           return;
         }
 
-        // Check if lock is cancelled
         if (lockData.status === 'cancelled') {
           setError('This lock has been cancelled.');
           setLoading(false);
           return;
         }
 
-        // Only show accept screen for pending locks
         if (lockData.status !== 'pending') {
           setError(`This lock is ${lockData.status} and cannot be accepted.`);
           setLoading(false);
           return;
         }
 
-        console.log('Lock loaded:', lockData);
         setLock(lockData);
         setLoading(false);
       } catch (err) {
@@ -66,7 +63,6 @@ export default function AcceptLockScreen() {
 
     if (!authLoading) {
       if (!user) {
-        // User not logged in - they need to sign in first
         setError('Please sign in to accept this lock invitation');
         setLoading(false);
       } else {
@@ -78,63 +74,39 @@ export default function AcceptLockScreen() {
   const handleAccept = async () => {
     if (!lock || !user) return;
 
-    // Double-check lock is still pending before accepting
     if (lock.status !== 'pending') {
-      Alert.alert(
-        'Cannot Accept',
-        `This lock is already ${lock.status} and cannot be accepted.`,
-        [{ text: 'OK', onPress: () => router.replace('/(tabs)/your_locks') }]
-      );
+      Alert.alert('Cannot Accept', `This lock is already ${lock.status} and cannot be accepted.`, [
+        { text: 'OK', onPress: () => router.replace('/(tabs)/your_locks') },
+      ]);
       return;
     }
 
     setAccepting(true);
     try {
-      console.log('Accepting lock:', lock.id);
       await acceptLock(lock.id, user.uid);
-      
-      Alert.alert(
-        'Lock Accepted!',
-        'The lock has been activated on your device.',
-        [
-          {
-            text: 'OK',
-            onPress: () => router.replace('/(tabs)/your_locks'),
-          },
-        ]
-      );
+      Alert.alert('Lock Accepted!', 'The lock has been activated on your device.', [
+        { text: 'OK', onPress: () => router.replace('/(tabs)/your_locks') },
+      ]);
     } catch (err) {
       console.error('Error accepting lock:', err);
-      Alert.alert(
-        'Error',
-        'Failed to accept lock. Please try again.',
-        [{ text: 'OK' }]
-      );
+      Alert.alert('Error', 'Failed to accept lock. Please try again.');
     } finally {
       setAccepting(false);
     }
   };
 
   const handleDecline = () => {
-    Alert.alert(
-      'Decline Lock',
-      'Are you sure you want to decline this lock invitation?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Decline',
-          style: 'destructive',
-          onPress: () => router.replace('/(tabs)'),
-        },
-      ]
-    );
+    Alert.alert('Decline Lock', 'Are you sure you want to decline this lock invitation?', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Decline', style: 'destructive', onPress: () => router.replace('/(tabs)') },
+    ]);
   };
 
   if (authLoading || loading) {
     return (
       <SafeAreaView style={styles.container} edges={['top', 'left', 'right', 'bottom']}>
         <View style={styles.centerContent}>
-          <ActivityIndicator size="large" color="#007AFF" />
+          <ActivityIndicator size="large" color={Colors.blue} />
           <Text style={styles.loadingText}>Loading invitation...</Text>
         </View>
       </SafeAreaView>
@@ -145,7 +117,9 @@ export default function AcceptLockScreen() {
     return (
       <SafeAreaView style={styles.container} edges={['top', 'left', 'right', 'bottom']}>
         <View style={styles.centerContent}>
-          <Text style={styles.errorEmoji}>🔒</Text>
+          <View style={styles.iconBox}>
+            <Ionicons name="lock-closed" size={56} color={Colors.blue} />
+          </View>
           <Text style={styles.errorText}>Please sign in to accept this lock invitation</Text>
           <View style={styles.buttonContainer}>
             <Button title="Sign In" onPress={() => router.push('/signin')} />
@@ -160,7 +134,7 @@ export default function AcceptLockScreen() {
     return (
       <SafeAreaView style={styles.container} edges={['top', 'left', 'right', 'bottom']}>
         <View style={styles.centerContent}>
-          <Text style={styles.errorEmoji}>❌</Text>
+          <Ionicons name="close-circle" size={72} color={Colors.red} />
           <Text style={styles.errorText}>{error}</Text>
           <Button title="Go Home" onPress={() => router.replace('/(tabs)')} />
         </View>
@@ -172,7 +146,7 @@ export default function AcceptLockScreen() {
     return (
       <SafeAreaView style={styles.container} edges={['top', 'left', 'right', 'bottom']}>
         <View style={styles.centerContent}>
-          <Text style={styles.errorEmoji}>❌</Text>
+          <Ionicons name="close-circle" size={72} color={Colors.red} />
           <Text style={styles.errorText}>Lock not found</Text>
           <Button title="Go Home" onPress={() => router.replace('/(tabs)')} />
         </View>
@@ -183,19 +157,30 @@ export default function AcceptLockScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right', 'bottom']}>
       <View style={styles.content}>
-        <Text style={styles.emoji}>🔒</Text>
+        <View style={styles.iconBox}>
+          <Ionicons name="lock-closed" size={56} color={Colors.blue} />
+        </View>
+
         <Text style={styles.title}>Lock Invitation</Text>
-        
+
         <View style={styles.card}>
           <Text style={styles.label}>Daily Time Limit:</Text>
           <Text style={styles.value}>{lock.dailyMinutes} minutes</Text>
-          
-          <Text style={[styles.label, styles.marginTop]}>Status:</Text>
-          <Text style={styles.value}>{lock.status}</Text>
+
+          <View style={styles.infoRows}>
+            <View style={styles.infoRow}>
+              <Ionicons name="calendar-outline" size={16} color={Colors.textSecondary} />
+              <Text style={styles.infoText}>Resets at midnight</Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Ionicons name="apps-outline" size={16} color={Colors.textSecondary} />
+              <Text style={styles.infoText}>{lock.appTokens?.length || 0} apps restricted</Text>
+            </View>
+          </View>
         </View>
 
         <Text style={styles.description}>
-          By accepting this lock, the selected apps will be restricted to {lock.dailyMinutes} minutes per day on your device.
+          By accepting, the selected apps will be restricted to {lock.dailyMinutes} minutes per day on your device.
         </Text>
 
         <View style={styles.buttonContainer}>
@@ -204,12 +189,7 @@ export default function AcceptLockScreen() {
             onPress={handleAccept}
             disabled={accepting}
           />
-          <Button
-            title="Decline"
-            onPress={handleDecline}
-            disabled={accepting}
-            variant="secondary"
-          />
+          <Button title="Decline" onPress={handleDecline} disabled={accepting} variant="secondary" />
         </View>
       </View>
     </SafeAreaView>
@@ -219,77 +199,87 @@ export default function AcceptLockScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0B0B0F',
+    backgroundColor: Colors.bg,
   },
   content: {
     flex: 1,
-    padding: 20,
+    padding: Spacing.lg,
     justifyContent: 'center',
   },
   centerContent: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    padding: Spacing.lg,
+    gap: Spacing.base,
+  },
+  iconBox: {
+    backgroundColor: Colors.card,
+    borderRadius: 40,
     padding: 20,
-  },
-  emoji: {
-    fontSize: 72,
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  errorEmoji: {
-    fontSize: 72,
-    textAlign: 'center',
-    marginBottom: 20,
+    alignSelf: 'center',
+    marginBottom: Spacing.lg,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#EDEDED',
+    color: Colors.textPrimary,
     textAlign: 'center',
-    marginBottom: 30,
+    marginBottom: 24,
   },
   card: {
     backgroundColor: '#1F1F23',
-    borderRadius: 12,
-    padding: 20,
-    marginBottom: 20,
+    borderRadius: Radius.lg,
+    padding: Spacing.lg,
+    marginBottom: Spacing.lg,
     borderWidth: 1,
-    borderColor: '#3F3F46',
+    borderColor: Colors.borderStrong,
   },
   label: {
     fontSize: 14,
-    color: '#A1A1AA',
+    color: Colors.textSecondary,
     marginBottom: 5,
   },
   value: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#EDEDED',
+    color: Colors.textPrimary,
+    marginBottom: Spacing.md,
   },
-  marginTop: {
-    marginTop: 15,
+  infoRows: {
+    gap: 8,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+    paddingTop: Spacing.md,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  infoText: {
+    fontSize: 14,
+    color: Colors.textSecondary,
   },
   description: {
-    fontSize: 16,
-    color: '#A1A1AA',
+    fontSize: 15,
+    color: Colors.textSecondary,
     textAlign: 'center',
-    marginBottom: 30,
-    lineHeight: 24,
+    marginBottom: 24,
+    lineHeight: 22,
   },
   buttonContainer: {
     gap: 12,
   },
   loadingText: {
     fontSize: 16,
-    color: '#A1A1AA',
+    color: Colors.textSecondary,
     marginTop: 16,
   },
   errorText: {
     fontSize: 18,
-    color: '#EDEDED',
+    color: Colors.textPrimary,
     textAlign: 'center',
-    marginBottom: 30,
     paddingHorizontal: 20,
   },
 });
