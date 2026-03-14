@@ -4,6 +4,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getFirestore } from 'firebase/firestore';
 
 // Your web app's Firebase configuration
+// NOTE: The Firebase project is named "lock-it-a3dee" — this is an external resource
+// (live Firestore database + Auth project). Do NOT rename these values to "timesync".
+// Renaming would require migrating the live Firebase project, which is out of scope.
 const firebaseConfig = {
   apiKey: "AIzaSyCnDuzZGLZCEbVrEAlLRhQmJBMXdMLySHs",
   authDomain: "lock-it-a3dee.firebaseapp.com",

@@ -41,10 +41,8 @@ export const DeepLinkProvider: React.FC<{ children: ReactNode }> = ({ children }
   // Handle URL parsing and invite extraction
   const extractInviteIdFromUrl = (url: string): string | null => {
     try {
-      console.log('Parsing URL:', url);
       const parsed = Linking.parse(url);
-      console.log('Parsed URL:', JSON.stringify(parsed, null, 2));
-      
+
       // Handle timesync://lock/{inviteId}
       // URL format: timesync://lock/{inviteId}
       if (parsed.scheme === 'timesync') {
@@ -54,9 +52,7 @@ export const DeepLinkProvider: React.FC<{ children: ReactNode }> = ({ children }
             // Path should be "/{inviteId}" or "{inviteId}"
             const pathParts = parsed.path.split('/').filter(Boolean);
             if (pathParts.length > 0) {
-              const inviteId = pathParts[0];
-              console.log('Extracted inviteId from hostname=lock:', inviteId);
-              return inviteId;
+              return pathParts[0];
             }
           }
           // If no path but hostname is lock, might be timesync://lock?inviteId=...
@@ -64,30 +60,26 @@ export const DeepLinkProvider: React.FC<{ children: ReactNode }> = ({ children }
             return parsed.queryParams.inviteId as string;
           }
         }
-        
+
         // Case 2: timesync:///lock/{inviteId} or timesync:///{inviteId} (no hostname)
         if (parsed.path) {
           const pathParts = parsed.path.split('/').filter(Boolean);
           // If path is /lock/{inviteId}
           if (pathParts[0] === 'lock' && pathParts[1]) {
-            console.log('Extracted inviteId from path /lock/{id}:', pathParts[1]);
             return pathParts[1];
           }
           // If path is just /{inviteId} (when hostname might be null/empty)
           if (pathParts.length === 1 && pathParts[0]) {
-            console.log('Extracted inviteId from path /{id}:', pathParts[0]);
             return pathParts[0];
           }
         }
-        
+
         // Case 3: Query parameter format timesync://?inviteId=...
         if (parsed.queryParams && parsed.queryParams.inviteId) {
-          console.log('Extracted inviteId from query params:', parsed.queryParams.inviteId);
           return parsed.queryParams.inviteId as string;
         }
       }
-      
-      console.log('No inviteId found in URL');
+
       return null;
     } catch (error) {
       console.error('Error parsing URL:', error);
@@ -106,26 +98,16 @@ export const DeepLinkProvider: React.FC<{ children: ReactNode }> = ({ children }
 
   const handleUrl = React.useCallback(async (url: string) => {
     try {
-      console.log('Handling URL:', url);
       const inviteId = extractInviteIdFromUrl(url);
       if (inviteId) {
-        console.log('Found inviteId:', inviteId);
         await storePendingInvite(inviteId);
         // If user is logged in, load the lock immediately
         if (user) {
-          console.log('User is logged in, loading lock...');
           const lock = await getLockByInviteId(inviteId);
           if (lock) {
-            console.log('Lock loaded:', lock.id);
             setPendingLock(lock);
-          } else {
-            console.log('Lock not found for inviteId:', inviteId);
           }
-        } else {
-          console.log('User not logged in, invite stored for later');
         }
-      } else {
-        console.log('No inviteId extracted from URL');
       }
     } catch (error) {
       console.error('Error handling deep link:', error);
@@ -138,23 +120,14 @@ export const DeepLinkProvider: React.FC<{ children: ReactNode }> = ({ children }
       try {
         const storedInviteId = await AsyncStorage.getItem(PENDING_INVITE_KEY);
         if (storedInviteId) {
-          console.log('Found stored invite ID:', storedInviteId);
           setPendingInvite(storedInviteId);
           // If user is logged in, load the lock immediately
           if (user) {
-            console.log('User is logged in, loading lock from stored invite...');
             const lock = await getLockByInviteId(storedInviteId);
             if (lock) {
-              console.log('Lock loaded from stored invite:', lock.id);
               setPendingLock(lock);
-            } else {
-              console.log('Lock not found for stored invite ID:', storedInviteId);
             }
-          } else {
-            console.log('User not logged in yet, invite will be loaded after login');
           }
-        } else {
-          console.log('No stored invite found');
         }
       } catch (error) {
         console.error('Error loading stored invite:', error);
@@ -169,7 +142,6 @@ export const DeepLinkProvider: React.FC<{ children: ReactNode }> = ({ children }
     const handleInitialUrl = async () => {
       try {
         const initialUrl = await Linking.getInitialURL();
-        console.log('Initial URL:', initialUrl);
         if (initialUrl) {
           await handleUrl(initialUrl);
         }
@@ -180,7 +152,6 @@ export const DeepLinkProvider: React.FC<{ children: ReactNode }> = ({ children }
 
     // Handle deep link when app is already open
     const subscription = Linking.addEventListener('url', (event) => {
-      console.log('Deep link event received:', event.url);
       handleUrl(event.url);
     });
 
@@ -218,14 +189,7 @@ export const DeepLinkProvider: React.FC<{ children: ReactNode }> = ({ children }
   // When user logs in, check for pending invite and load lock
   useEffect(() => {
     if (user && pendingInvite && !pendingLock) {
-      console.log('User logged in with pending invite, loading lock...');
-      loadPendingLock(pendingInvite).then((lock) => {
-        if (lock) {
-          console.log('Lock loaded after login:', lock.id);
-        } else {
-          console.log('Failed to load lock after login for invite:', pendingInvite);
-        }
-      });
+      loadPendingLock(pendingInvite);
     }
   }, [user, pendingInvite, pendingLock]);
 
@@ -244,4 +208,3 @@ export const DeepLinkProvider: React.FC<{ children: ReactNode }> = ({ children }
     </DeepLinkContext.Provider>
   );
 };
-
